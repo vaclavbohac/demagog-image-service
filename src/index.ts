@@ -2,11 +2,25 @@ import { createHash } from "crypto";
 import * as fs from "fs";
 import * as http from "http";
 import * as request from "request";
+import { isRequestInvalid } from "./validation";
+
+function logger(message: string): void {
+    // tslint:disable-next-line:no-console
+    console.log(message);
+}
 
 http
     .createServer((req, res) => {
         if (!req.url) {
+            logger("Missing url");
             res.writeHead(400);
+            return res.end();
+        }
+
+        if (isRequestInvalid(req.url)) {
+            logger(`Url "${req.url}" is invalid`);
+
+            res.writeHead(404);
             return res.end();
         }
 
@@ -16,14 +30,15 @@ http
 
         const cachedFile = `uploads/${hash}.png`;
 
-        // tslint:disable-next-line:no-console
-        console.log(req.url);
-
         if (fs.existsSync(cachedFile)) {
+            logger(`Serving "${req.url}" from cache.`);
+
             return fs
                 .createReadStream(cachedFile)
                 .pipe(res);
         }
+
+        logger(`Fetching "${req.url}" from remote server.`);
 
         const saveFile$ = fs
             .createWriteStream(`uploads/${hash}.png`);
