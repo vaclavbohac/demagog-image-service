@@ -24,6 +24,8 @@ http
             return res.end();
         }
 
+        res.setHeader("Cache-Control", "public, max-age=315360000");
+
         const hash = createHash("md5")
             .update(req.url)
             .digest("hex");
