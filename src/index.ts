@@ -9,6 +9,10 @@ function logger(message: string): void {
     console.log(message);
 }
 
+function getServerUri(): string {
+    return process.env.SERVER_URI;
+}
+
 http
     .createServer((req, res) => {
         if (!req.url) {
@@ -46,7 +50,7 @@ http
             .createWriteStream(`uploads/${hash}.png`);
 
         const readFile$ = request
-            .get(`http://demagog.cz/${req.url}`)
+            .get(`${getServerUri()}${req.url}`)
             .on("data", (data: string) => res.write(data))
             .on("end", () => res.end());
 
